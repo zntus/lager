@@ -1,19 +1,19 @@
-.PHONY: all compile deps clean distclean test check_plt build_plt dialyzer \
+.PHONY: all compile upgrade-deps clean distclean test check_plt build_plt dialyzer \
 	    cleanplt
 
-all: deps compile
+all: compile
 
-compile: deps
-	./rebar compile
+compile:
+	./rebar3 compile
 
-deps:
-	test -d deps || ./rebar get-deps
+upgrade-deps:
+	./rebar3 upgrade
 
 clean:
-	./rebar clean
+	./rebar3 clean
 
-distclean: clean
-	./rebar delete-deps
+distclean:
+	./rebar3 clean --all
 
 DIALYZER_APPS = kernel stdlib erts sasl eunit syntax_tools compiler crypto \
 				common_test
