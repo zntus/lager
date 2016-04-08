@@ -22,6 +22,7 @@ overload_test_() ->
              application:set_env(lager, error_logger_redirect, true),
              application:set_env(lager, killer_hwm, KillerHWM),
              application:set_env(lager, killer_reinstall_after, KillerReinstallAfter),
+             application:set_env(lager, killer_tick, test),
              ensure_started(lager),
              lager_config:set(async, true),
              Manager = whereis(lager_event),
@@ -59,6 +60,7 @@ overload_alternate_sink_test_() ->
                                                                           {handlers, [{lager_slow_backend, [{delay, Delay}]}]},
                                                                           {killer_hwm, KillerHWM},
                                                                           {killer_reinstall_after, KillerReinstallAfter},
+                                                                          {killer_tick, test},
                                                                           {async_threshold, undefined}
                                                                          ]}]),
              application:set_env(lager, error_logger_redirect, true),

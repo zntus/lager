@@ -128,14 +128,22 @@ interpret_hwm(HWM) when not is_integer(HWM) orelse HWM < 0 ->
 interpret_hwm(HWM) ->
     HWM.
 
-maybe_install_sink_killer(_Sink, undefined, _ReinstallTimer) -> ok;
-maybe_install_sink_killer(Sink, HWM, undefined) -> maybe_install_sink_killer(Sink, HWM, 5000);
-maybe_install_sink_killer(Sink, HWM, ReinstallTimer) when is_integer(HWM) andalso is_integer(ReinstallTimer) 
-                                                        andalso HWM >= 0 andalso ReinstallTimer >= 0 ->
-    _ = supervisor:start_child(lager_handler_watcher_sup, [Sink, lager_manager_killer, 
-                                                           [HWM, ReinstallTimer]]);
-maybe_install_sink_killer(_Sink, HWM, ReinstallTimer) ->
-    error_logger:error_msg("Invalid value for 'killer_hwm': ~p or 'killer_reinstall_after': ~p", [HWM, ReinstallTimer]),
+maybe_install_sink_killer(_Sink, undefined, _ReinstallTimer, _Tick) -> ok;
+maybe_install_sink_killer(Sink, HWM, undefined, undefined) -> maybe_install_sink_killer(Sink, HWM, 5000, 1000);
+maybe_install_sink_killer(Sink, HWM, undefined, Tick) -> maybe_install_sink_killer(Sink, HWM, 5000, Tick);
+maybe_install_sink_killer(Sink, HWM, ReinstallTimer, undefined) -> maybe_install_sink_killer(Sink, HWM, ReinstallTimer, 1000);
+%% if we're in test mode, circumvent the usual checks
+maybe_install_sink_killer(Sink, HWM, ReinstallTimer, test) ->
+    _ = supervisor:start_child(lager_handler_watcher_sup, [Sink, lager_manager_killer,
+                                                           [HWM, ReinstallTimer, test]]);
+maybe_install_sink_killer(Sink, HWM, ReinstallTimer, Tick) when is_integer(HWM) andalso is_integer(ReinstallTimer)
+                                                        andalso is_integer(Tick) andalso HWM > 0
+                                                        andalso ReinstallTimer > 0  andalso Tick > 0 ->
+    _ = supervisor:start_child(lager_handler_watcher_sup, [Sink, lager_manager_killer,
+                                                           [HWM, ReinstallTimer, Tick]]);
+maybe_install_sink_killer(_Sink, HWM, ReinstallTimer, Tick) ->
+    error_logger:error_msg("Invalid value for 'killer_hwm': ~p or 'killer_reinstall_after': ~p or 'killer_tick':~p",
+                           [HWM, ReinstallTimer, Tick]),
     throw({error, bad_config}).
 
 start_error_logger_handler({ok, false}, _HWM, _Whitelist) ->
@@ -188,8 +196,9 @@ configure_sink(Sink, SinkDef) ->
     determine_async_behavior(Sink, proplists:get_value(async_threshold, SinkDef),
                              proplists:get_value(async_threshold_window, SinkDef)
                             ),
-    _ = maybe_install_sink_killer(Sink, proplists:get_value(killer_hwm, SinkDef), 
-                              proplists:get_value(killer_reinstall_after, SinkDef)),
+    _ = maybe_install_sink_killer(Sink, proplists:get_value(killer_hwm, SinkDef),
+                              proplists:get_value(killer_reinstall_after, SinkDef),
+                              proplists:get_value(killer_tick, SinkDef)),
     start_handlers(Sink,
                    proplists:get_value(handlers, SinkDef, [])),
 
@@ -226,8 +235,9 @@ boot() ->
                              get_env(lager, async_threshold),
                              get_env(lager, async_threshold_window)),
 
-    _ = maybe_install_sink_killer(?DEFAULT_SINK, get_env(lager, killer_hwm), 
-                              get_env(lager, killer_reinstall_after)),
+    _ = maybe_install_sink_killer(?DEFAULT_SINK, get_env(lager, killer_hwm),
+                              get_env(lager, killer_reinstall_after),
+                              get_env(lager, killer_tick)),
 
     start_handlers(?DEFAULT_SINK,
                    get_env(lager, handlers, ?DEFAULT_HANDLER_CONF)),

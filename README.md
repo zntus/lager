@@ -308,16 +308,20 @@ You can configure this behavior by using these configuration directives:
 
 ```erlang
 {killer_hwm, 1000},
-{killer_reinstall_after, 5000}
+{killer_reinstall_after, 5000},
+{killer_tick, 1000}
 ```
 
 This means if the sink's mailbox size exceeds 1000 messages, kill the
-entire sink and reload it after 5000 milliseconds. This behavior can
-also be installed into alternative sinks if desired.
+entire sink and reload it after 5000 milliseconds. The mailbox
+queue length will be checked every 1000 milliseconds. 
+
+This behavior can also be installed into alternative sinks if desired.
 
 By default, the manager killer *is not installed* into any sink. If
 the `killer_reinstall_after` cool down time is not specified it defaults
-to 5000.
+to 5000. If the `killer_tick` interval is not specified, it defaults
+to 1000.
 
 "Unsafe"
 --------
