@@ -1,3 +1,42 @@
+Clone of erlang-lager/lager
+--------
+Logging to Amazon S3
+To configure S3 backends.
+
+```erlang
+{lager, [
+  {handlers, [
+    {lager_s3_backend, [
+      {formatter_config, [date, " ", time," [",severity,"] ",pid, " ", message, "\n"]},
+      {level, info},
+      {aws_config, [
+        {s3_host, "your.s3.domain"},
+        {access_key_id, "YOUR-S3-ACCESS-KEY"},
+        {secret_access_key, "YOUR-S3-SECRET-ACCESS-KEY"}
+      ]},
+      {s3_bucket, "your_s3_bucket"},
+      {log_file, "your_s3_file"}
+    ]}
+  ]}
+]}.
+```
+
+You can provide your amazon credentials in OS environmental variables using 'profile'
+
+```erlang
+{lager, [
+  {handlers, [
+    {lager_s3_backend, [
+      {formatter_config, [date, " ", time," [",severity,"] ",pid, " ", message, "\n"]},
+      {level, info},
+      {aws_config, profile},
+      {s3_bucket, "your_s3_bucket"},
+      {log_file, "your_s3_file"}
+    ]}
+  ]}
+]}.
+```
+
 Overview
 --------
 Lager (as in the beer) is a logging framework for Erlang. Its purpose is
