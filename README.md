@@ -1,6 +1,5 @@
 Clone of erlang-lager/lager
 --------
-Logging to Amazon S3
 To configure S3 backends.
 
 ```erlang
