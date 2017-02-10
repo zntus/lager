@@ -38,7 +38,7 @@ You can provide your amazon credentials in OS environmental variables using 'pro
 
 AWS CloudWatch Logs Backends
 --------
-To configure S3 backends.
+To configure CloudWatch Logs backends.
 
 ```erlang
 {lager, [
