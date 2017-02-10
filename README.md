@@ -43,7 +43,7 @@ To configure CloudWatch Logs backends.
 ```erlang
 {lager, [
   {handlers, [
-    {lager_s3_backend, [
+    {lager_cloudwatch_logs_backend, [
       {formatter_config, [date, " ", time," [",severity,"] ",pid, " ", message, "\n"]},
       {level, info},
       {aws_config, [
@@ -63,12 +63,12 @@ You can provide your amazon credentials in OS environmental variables using 'pro
 ```erlang
 {lager, [
   {handlers, [
-    {lager_s3_backend, [
+    {lager_cloudwatch_logs_backend, [
       {formatter_config, [date, " ", time," [",severity,"] ",pid, " ", message, "\n"]},
       {level, info},
       {aws_config, profile},
-      {s3_bucket, "your_s3_bucket"},
-      {log_file, "your_s3_file"}
+      {log_group, "your_log_group_name"},
+      {log_stream, "your_log_stream_name"}
     ]}
   ]}
 ]}.
